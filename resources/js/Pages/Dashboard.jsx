@@ -45,11 +45,11 @@ export default function Dashboard({ auth }) {
     };
 
     const handleChange = (oldKey, index, event) => {
+        // console.warn("Old key = "+oldKey+ ", New key = "+newKey);
         var newKey = event.target.value;
         const newSelectedValues = [...columnList];
         newSelectedValues[index] = newKey;
         setColumnList(newSelectedValues);
-        // console.warn("Old key = "+oldKey+ ", New key = "+newKey);
         changeKeyName(oldKey, newKey);
     }
 
