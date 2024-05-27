@@ -7,31 +7,39 @@ import 'bootstrap/dist/css/bootstrap.css';
 
 export default function Dashboard({ auth }) {
 
-
-
-
-
     const { data, setData, errors, post, progress } = useForm({
         name: "Deepak",
-        csv_data: [
-            {"Column-1": "India", "Column-2": "Bihar", "Column-3": "Motihari", "": "sec-63"},
-            {"Column-1": "India", "Column-2": "UP", "Column-3": "Noida", "Column-4": "sec-155, UP"},
-            {"Column-1": "India", "Column-2": "Punjab", "Column-3": "Mohali", "Column-4": "sec-110, punjab"},
-        ]
+        csv_data: [],
+        mappedHeader: []
     });
+    const [headers, setHeaders] = useState([]);
     
-    const options = [
-        { value: 'name', label: 'Name' },
-        { value: 'state', label: 'State' },
-        { value: 'city', label: 'City' },
-        { value: 'date', label: 'Date' },
-        { value: 'address', label: 'Address' },
-        { value: 'country', label: 'Country' },
-        { value: 'Column-1', label: 'Column-1' },
-    ];
-    // Column List
-    const [columnList, setColumnList] = useState(['Column-1', "Column-2", "Column-3", "Column-4"]);
+    const handleFileUpload = (event) => {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const text = e.target.result;
+            processCsvData(text);
+        };
+        reader.readAsText(file);
+    };
+    
+    const processCsvData = (text) => {
+        const rows = text.split('\n');
+        const headers = rows[0].split(',').map(header => header.trim().toLowerCase());
+        const data = rows.slice(1).map(row => row.split(',').map(cell => cell.trim()));
+        setHeaders(headers);
+        setData({
+            ...data,
+            csv_data: data,
+            mappedHeader : headers
+        });
+    };
 
+    const options = ['name', 'email', 'state', 'city', 'date'];
+
+    
+    // Column List
     const changeKeyName = (oldKey, newKey) => {
         const updatedCsvData = data.csv_data.map(item => {
             const newItem = { ...item };
@@ -45,13 +53,17 @@ export default function Dashboard({ auth }) {
     };
 
     const handleChange = (oldKey, index, event) => {
-        // console.warn("Old key = "+oldKey+ ", New key = "+newKey);
         var newKey = event.target.value;
-        const newSelectedValues = [...columnList];
+        // console.warn("Old key = "+oldKey+ ", New key = "+newKey);
+        const newSelectedValues = [...headers];
         newSelectedValues[index] = newKey;
-        setColumnList(newSelectedValues);
+        // setColumnList(newSelectedValues);
+        setHeaders(newSelectedValues);
         changeKeyName(oldKey, newKey);
+
     }
+    // console.warn(columnList);
+    
 
     return (
         <AuthenticatedLayout
@@ -66,10 +78,90 @@ export default function Dashboard({ auth }) {
                         <div className="p-6 text-gray-900">You're logged in!</div>
                         <div className="p-6">
 
+                            <input type="file" accept=".csv" onChange={handleFileUpload} />
+                            {/* <div>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                        {headers.map((header, index) => (
+                                            <th key={index}>{header}</th>
+                                        ))}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {data.map((row, rowIndex) => (
+                                        <tr key={rowIndex}>
+                                            {row.map((cell, cellIndex) => (
+                                            <td key={cellIndex}>{cell}</td>
+                                            ))}
+                                        </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div> */}
 
 
 
 
+
+
+
+                        <Table  bordered hover variant="dfs">
+                            <thead>
+                                <tr>
+                                    <th>Column no</th>
+                                    <th>Column name</th>
+                                    <th>Value</th>
+                                    <th>Map to</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                    {headers.map((header, index) => (
+                                        <tr>
+                                            <td>{ index }</td>
+                                            <td key={index}>{ header }</td>
+                                            <td>{ data.csv_data[0][index] }</td>
+                                            <tr>
+                                                <select
+                                                    key={index}
+                                                    value={header}
+                                                    onChange={(event) => handleChange(header, index, event)} >
+                                                        {
+                                                            (header==options[index]) ? (
+                                                                <option value="">--: Select :--</option>
+                                                            ) : (
+                                                                <option value={data.mappedHeader[index]}>--: New create :--</option>
+                                                            )
+                                                        }
+                                                    {
+                                                        options.map((row, key) => (
+                                                            <option key={key} value={row}>
+                                                                {row}
+                                                            </option>
+                                                        ))
+                                                    }
+                                                </select>
+                                            </tr>
+                                        </tr>
+                                    ))}
+                            </tbody>
+                        </Table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{/* 
                             <Table stripped bordered hover size="sm" >
                                 <thead>
                                     <tr>
@@ -109,7 +201,7 @@ export default function Dashboard({ auth }) {
                             
                             <h3>Change Data</h3>
                             <pre>{JSON.stringify(data.csv_data, null, 2)}</pre>
-
+ */}
 
 
 
